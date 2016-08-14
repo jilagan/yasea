@@ -58,8 +58,8 @@ public class MainActivity extends Activity {
         btnRecord = (Button) findViewById(R.id.record);
         btnSwitchEncoder = (Button) findViewById(R.id.swEnc);
 
-        // TODO: screen is currently black and I need to activate preview even prior to broadcasting
         mPublisher.setSurfaceView((SurfaceView) findViewById(R.id.preview));
+
 
         btnPublish.setOnClickListener(new View.OnClickListener() {
             @Override

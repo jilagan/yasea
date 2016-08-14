@@ -76,6 +76,7 @@ public class SrsPublisher implements SurfaceHolder.Callback, Camera.PreviewCallb
             }
             mFlvMuxer.setVideoResolution(mEncoder.getOutputWidth(), mEncoder.getOutputHeight());
 
+            stopPreview(); // clear out preview mode prior to encoding; will get a 'Network is weak' error if we don't do this
             startEncode();
         }
     }
@@ -85,6 +86,7 @@ public class SrsPublisher implements SurfaceHolder.Callback, Camera.PreviewCallb
             stopEncode();
             mFlvMuxer.stop();
         }
+        startPreview(); // restart camera preview
     }
 
     public void startRecord(String recPath) {
@@ -172,6 +174,23 @@ public class SrsPublisher implements SurfaceHolder.Callback, Camera.PreviewCallb
         stopCamera();
         mEncoder.swithCameraFace();
         startCamera();
+    }
+
+    // Created by Joben Ilagan, 14 August 2016
+    private void startPreview(){
+
+        if (!mEncoder.start()) {
+            return;
+        }
+
+        startCamera();
+    }
+
+    // Created by Joben Ilagan, 14 August 2016
+    private void stopPreview(){
+        stopCamera();
+        stopAudio();
+        mEncoder.stop();
     }
 
     private void startCamera() {
@@ -331,6 +350,8 @@ public class SrsPublisher implements SurfaceHolder.Callback, Camera.PreviewCallb
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        // Camera preview automatically started, even prior to broadcast
+        startPreview();
     }
 
     @Override
@@ -346,5 +367,6 @@ public class SrsPublisher implements SurfaceHolder.Callback, Camera.PreviewCallb
 
     @Override
     public void surfaceDestroyed(SurfaceHolder arg0) {
+        stopPreview();
     }
 }
