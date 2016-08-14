@@ -131,7 +131,7 @@ public class SrsPublisher implements SurfaceHolder.Callback, Camera.PreviewCallb
         return mSamplingFps;
     }
 
-    public int getCamraId() {
+    public int getCameraId() {
         return mCamId;
     }
 

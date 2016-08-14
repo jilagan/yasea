@@ -46,7 +46,7 @@ public class MainActivity extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
 
         // restore data.
-        sp = getSharedPreferences("Yasea", MODE_PRIVATE);
+        sp = getSharedPreferences(getString(R.string.shared_preference), MODE_PRIVATE);
         rtmpUrl = sp.getString("rtmpUrl", rtmpUrl);
 
         // initialize url.
@@ -58,12 +58,14 @@ public class MainActivity extends Activity {
         btnRecord = (Button) findViewById(R.id.record);
         btnSwitchEncoder = (Button) findViewById(R.id.swEnc);
 
+        // TODO: screen is currently black and I need to activate preview even prior to broadcasting
         mPublisher.setSurfaceView((SurfaceView) findViewById(R.id.preview));
 
         btnPublish.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (btnPublish.getText().toString().contentEquals("publish")) {
+                    // check the rtmp url entered in the text field and save to shared preferences
                     rtmpUrl = efu.getText().toString();
                     Log.i(TAG, String.format("RTMP URL changed to %s", rtmpUrl));
                     SharedPreferences.Editor editor = sp.edit();
@@ -73,6 +75,7 @@ public class MainActivity extends Activity {
                     mPublisher.setPreviewResolution(1280, 720);
                     mPublisher.setOutputResolution(384, 640);
                     mPublisher.setVideoHDMode();
+
                     mPublisher.startPublish(rtmpUrl);
 
                     if (btnSwitchEncoder.getText().toString().contentEquals("soft enc")) {
@@ -96,7 +99,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 if (mPublisher.getNumberOfCameras() > 0) {
-                    mPublisher.switchCameraFace((mPublisher.getCamraId() + 1) % mPublisher.getNumberOfCameras());
+                    mPublisher.switchCameraFace((mPublisher.getCameraId() + 1) % mPublisher.getNumberOfCameras());
                 }
             }
         });
