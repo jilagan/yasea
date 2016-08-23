@@ -127,19 +127,19 @@ public class SrsFlvMuxer {
     }
 
     private void sendFlvTag(SrsFlvFrame frame) throws IllegalStateException, IOException {
-        if (!connected || frame == null || frame.tag.size <= 0) {
+        if (!connected || frame == null) {
             return;
         }
 
         if (frame.is_video()) {
-            publisher.publishVideoData(frame.tag.data.array());
+            publisher.publishVideoData(frame.flvTag.array(), frame.dts);
         } else if (frame.is_audio()) {
-            publisher.publishAudioData(frame.tag.data.array());
+            publisher.publishAudioData(frame.flvTag.array(), frame.dts);
         }
 
         if (frame.is_keyframe()) {
             Log.i(TAG, String.format("worker: send frame type=%d, dts=%d, size=%dB",
-                    frame.type, frame.dts, frame.tag.size));
+                    frame.type, frame.dts, frame.flvTag.array().length));
         }
     }
 
@@ -515,7 +515,7 @@ public class SrsFlvMuxer {
      */
     class SrsFlvFrame {
         // the tag bytes.
-        public SrsFlvFrameBytes tag;
+        public ByteBuffer flvTag;
         // the codec type for audio/aac and video/avc for instance.
         public int avc_aac_type;
         // the frame type, keyframe or not.
@@ -1008,7 +1008,8 @@ public class SrsFlvMuxer {
 
         private void rtmp_write_packet(int type, int dts, int frame_type, int avc_aac_type, SrsFlvFrameBytes tag) {
             SrsFlvFrame frame = new SrsFlvFrame();
-            frame.tag = tag;
+            frame.flvTag = ByteBuffer.allocate(tag.size);
+            frame.flvTag.put(tag.data.array());
             frame.type = type;
             frame.dts = dts;
             frame.frame_type = frame_type;
