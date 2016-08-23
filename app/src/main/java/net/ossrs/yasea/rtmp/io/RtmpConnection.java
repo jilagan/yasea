@@ -42,7 +42,8 @@ import net.ossrs.yasea.rtmp.packets.WindowAckSize;
 public class RtmpConnection implements RtmpPublisher, PacketRxHandler {
 
     private static final String TAG = "RtmpConnection";
-    private static final Pattern rtmpUrlPattern = Pattern.compile("^rtmp://([^/:]+)(:(\\d+))*/([^/]+)(/(.*))*$");
+    // private static final Pattern rtmpUrlPattern = Pattern.compile("^rtmp://([^/:]+)(:(\\d+))*/([^/]+)(/(.*))*$");
+    private static final Pattern rtmpUrlPattern = Pattern.compile("rtmp://([^/:]+)(:(\\d+))*/([^/]+)(/([^\\?\\&]*))*(\\?(.*))?(\\&(.*))?$");
 
     private RtmpPublisher.EventHandler mHandler;
     private String appName;
@@ -71,6 +72,9 @@ public class RtmpConnection implements RtmpPublisher, PacketRxHandler {
     private AmfNumber serverId;
     private int videoWidth;
     private int videoHeight;
+
+    String username;
+    String password;
 
     public RtmpConnection(RtmpPublisher.EventHandler handler) {
         mHandler = handler;
@@ -101,12 +105,21 @@ public class RtmpConnection implements RtmpPublisher, PacketRxHandler {
             port = portStr != null ? Integer.parseInt(portStr) : 1935;
             appName = matcher.group(4);
             streamName = matcher.group(6);
+            String paramString = matcher.group(8);
+            if(paramString!=null) {
+                String[] params = matcher.group(8).split("&");
+                username = params[0];
+                password = params[1];
+            }
+
         } else {
             throw new IllegalArgumentException("Invalid RTMP URL. Must be in format: rtmp://host[:port]/application[/streamName]");
         }
 
         // socket connection
         Log.d(TAG, "connect() called. Host: " + host + ", port: " + port + ", appName: " + appName + ", publishPath: " + streamName);
+        Log.d(TAG, "username: "+ username);
+        Log.d(TAG, "password: "+ password);
         socket = new Socket();
         SocketAddress socketAddress = new InetSocketAddress(host, port);
         socket.connect(socketAddress, 3000);
@@ -363,6 +376,9 @@ public class RtmpConnection implements RtmpPublisher, PacketRxHandler {
         serverPid = null;
         serverId = null;
         rtmpSessionInfo = null;
+
+        username = null;
+        password = null;
     }
 
     @Override
